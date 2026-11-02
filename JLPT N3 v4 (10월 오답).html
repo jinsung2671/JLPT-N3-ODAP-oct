@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JLPT N3 한끝 단어 마스터 앱</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-body: #0f172a;
+      --bg-card: #1e293b;
+      --bg-sub: #0f172a;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --text-muted: #64748b;
+      --primary: #38bdf8;
+      --btn-start: #0284c7;
+      --btn-start-hover: #0369a1;
+      --opt-hover-bg: #1e293b;
+      --opt-hover-border: #64748b;
+      --badge-bg: #334155;
+      --correct-bg: #064e3b;
+      --correct-border: #10b981;
+      --correct-text: #a7f3d0;
+      --wrong-bg: #7f1d1d;
+      --wrong-border: #ef4444;
+      --wrong-text: #fecaca;
+      --unknown-bg: #451a03;
+      --unknown-border: #f97316;
+      --unknown-text: #ffedd5;
+    }
+
+    body.theme-light {
+      --bg-body: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-sub: #f8fafc;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --text-muted: #94a3b8;
+      --primary: #0284c7;
+      --btn-start: #0284c7;
+      --btn-start-hover: #0369a1;
+      --opt-hover-bg: #f1f5f9;
+      --opt-hover-border: #94a3b8;
+      --badge-bg: #e2e8f0;
+      --correct-bg: #dcfce7;
+      --correct-border: #16a34a;
+      --correct-text: #14532d;
+      --wrong-bg: #fee2e2;
+      --wrong-border: #dc2626;
+      --wrong-text: #7f1d1d;
+      --unknown-bg: #ffedd5;
+      --unknown-border: #ea580c;
+      --unknown-text: #7c2d12;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+    .app-container {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 520px;
+      padding: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .nav-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .nav-btn {
+      background-color: var(--badge-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-sub);
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { color: var(--text-main); border-color: var(--text-muted); }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    .select-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .select-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      background-color: var(--bg-sub);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .select-item:hover {
+      border-color: var(--primary);
+    }
+    .select-item.selected {
+      border-color: var(--primary);
+      background-color: rgba(56, 189, 248, 0.12);
+    }
+    .item-label { font-size: 14px; font-weight: 600; }
+    .item-count {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background-color: var(--badge-bg);
+      color: var(--text-sub);
+      font-weight: 700;
+    }
+    .start-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--btn-start);
+      color: #ffffff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .start-btn:hover { background-color: var(--btn-start-hover); }
+    .quiz-progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background-color: var(--bg-sub);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .quiz-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      transition: width 0.2s ease;
+    }
+    .prompt-box {
+      text-align: center;
+      padding: 16px 8px;
+      background-color: var(--bg-sub);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 14px;
+    }
+    .prompt-type-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background-color: var(--badge-bg);
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+    .prompt-text {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-main);
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 440px) {
+      .options-grid { grid-template-columns: 1fr; }
+    }
+    .opt-btn {
+      min-height: 44px;
+      padding: 8px 10px;
+      background-color: var(--bg-sub);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.12s ease;
+    }
+    .opt-btn:hover:not(:disabled) {
+      background-color: var(--opt-hover-bg);
+      border-color: var(--opt-hover-border);
+    }
+    .opt-btn .num {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      min-width: 14px;
+    }
+    .opt-btn.correct {
+      background-color: var(--correct-bg) !important;
+      border-color: var(--correct-border) !important;
+      color: var(--correct-text) !important;
+      font-weight: 700;
+    }
+    .opt-btn.wrong {
+      background-color: var(--wrong-bg) !important;
+      border-color: var(--wrong-border) !important;
+      color: var(--wrong-text) !important;
+      font-weight: 700;
+    }
+    .opt-btn.unknown-btn {
+      background-color: var(--bg-sub);
+      border-color: var(--border-color);
+      color: var(--text-sub);
+    }
+    .opt-btn.selected-unknown {
+      background-color: var(--unknown-bg) !important;
+      border-color: var(--unknown-border) !important;
+      color: var(--unknown-text) !important;
+      font-weight: 700;
+    }
+    .detail-card {
+      display: none;
+      background-color: var(--bg-sub);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .detail-card.show { display: block; }
+    .detail-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .detail-label {
+      color: var(--text-muted);
+      font-weight: 600;
+      min-width: 58px;
+    }
+    .detail-value {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+    .detail-value.hanja-meaning {
+      color: #f59e0b; /* 한자 훈음 강조 */
+    }
+    .next-btn {
+      display: none;
+      width: 100%;
+      padding: 12px;
+      background: var(--btn-start);
+      border: none;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .next-btn:hover { background-color: var(--btn-start-hover); }
+    .finish-screen {
+      text-align: center;
+      padding: 24px 8px;
+    }
+    .finish-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .finish-desc {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="top-nav">
+    <div class="nav-title">
+      <span>📖 JLPT N3 한끝 마스터</span>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-btn" onclick="toggleTheme()" id="themeBtn">🌓 테마</button>
+      <button class="nav-btn" onclick="goToSetup()">⚙️ 설정</button>
+      <button class="nav-btn" onclick="confirmResetStats()">🔄 초기화</button>
+    </div>
+  </div>
+
+  <!-- SETUP SCREEN -->
+  <div id="setupScreen" class="screen active">
+    <div class="section-title">1단계: 학습할 단어장 선택</div>
+    <div class="select-grid" id="listSelectionGrid">
+      <div class="select-item selected" onclick="selectList('all', this)">
+        <span class="item-label">전체 단어 (무작위)</span>
+        <span class="item-count" id="countAll">162개</span>
+      </div>
+      <div class="select-item" onclick="selectList('wrong1', this)">
+        <span class="item-label">1회 틀린 단어</span>
+        <span class="item-count" id="countW1">0개</span>
+      </div>
+      <div class="select-item" onclick="selectList('wrong2', this)">
+        <span class="item-label">2회 틀린 단어</span>
+        <span class="item-count" id="countW2">0개</span>
+      </div>
+      <div class="select-item" onclick="selectList('wrong3', this)">
+        <span class="item-label">3회 이상 틀린 단어</span>
+        <span class="item-count" id="countW3">0개</span>
+      </div>
+    </div>
+
+    <div class="section-title">2단계: 퀴즈 유형 선택</div>
+    <div class="select-grid" id="typeSelectionGrid">
+      <div class="select-item selected" onclick="selectType(1, this)">
+        <span class="item-label">한자/원문 ➔ 발음(히라가나)</span>
+      </div>
+      <div class="select-item" onclick="selectType(2, this)">
+        <span class="item-label">한자/원문 ➔ 한국어 뜻</span>
+      </div>
+      <div class="select-item" onclick="selectType(3, this)">
+        <span class="item-label">발음(히라가나) ➔ 한국어 뜻</span>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn" onclick="startQuizSession()">학습 시작하기 (셔플)</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quizScreen" class="screen">
+    <div class="quiz-progress-bar-bg">
+      <div class="quiz-progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="prompt-box">
+      <div class="prompt-type-badge" id="promptTypeBadge">유형</div>
+      <div class="prompt-text" id="promptWord">単語</div>
+    </div>
+
+    <div class="options-grid" id="optionsContainer"></div>
+
+    <div class="detail-card" id="detailCard">
+      <div class="detail-item"><span class="detail-label">한자</span><span class="detail-value" id="detailKanji"></span></div>
+      <div class="detail-item" id="detailHanjaBox"><span class="detail-label">한자훈음</span><span class="detail-value hanja-meaning" id="detailHanjaMeaning"></span></div>
+      <div class="detail-item"><span class="detail-label">발음</span><span class="detail-value" id="detailReading"></span></div>
+      <div class="detail-item"><span class="detail-label">의미</span><span class="detail-value" id="detailMeaning"></span></div>
+    </div>
+
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">다음 문제 ▶</button>
+  </div>
+
+  <!-- FINISH SCREEN -->
+  <div id="finishScreen" class="screen finish-screen">
+    <div class="finish-title">🎉 학습 세션 완료!</div>
+    <div class="finish-desc" id="finishSummary">선택한 단어장의 모든 문제를 1회독 완료했습니다.</div>
+    <button class="start-btn" onclick="goToSetup()">설정 화면으로 이동</button>
+  </div>
+</div>
+
+<script>
+  // ================= 한국식 한자 훈음 딕셔너리 =================
+  const kanjiDict = {
+    "合": "합할 합", "図": "그림 도", "相": "서로 상", "手": "손 수", "諦": "살필 체/단념할 체",
+    "浅": "얕을 천", "預": "맡길 예", "遊": "놀 유", "暖": "따뜻할 난", "温": "따뜻할 온",
+    "辺": "가 변", "当": "마땅 당", "厚": "두터울 후", "扱": "미칠 급/취급할 급", "穴": "구멍 혈",
+    "浴": "목욕할 욕", "余": "남을 여", "編": "엮을 편", "表": "겉 표", "現": "나타날 현",
+    "暗": "어두울 암", "記": "기록할 기", "案": "책상 안/생각할 안", "外": "바깥 외", "内": "안 내",
+    "胃": "밥통 위", "意": "뜻 의", "息": "숨쉴 식", "行": "다닐 행", "先": "먼저 선",
+    "以": "써 이", "降": "내릴 강/항복할 항", "志": "뜻 지", "異": "다를 이", "常": "항상 상",
+    "痛": "아플 통", "位": "자리 위", "置": "둘 치", "応": "응할 응", "度": "법도 도/횟수 도",
+    "一": "한 일", "般": "일반 반", "的": "과녁 적", "移": "옮길 이", "動": "움직일 동",
+    "岩": "바위 암", "印": "도장 인", "象": "코끼리 상/형상 상", "植": "심을 식", "受": "받을 수",
+    "入": "들 입", "取": "취할 취", "右": "오른 우", "折": "꺾을 절", "疑": "의심할 의",
+    "側": "곁 측", "打": "칠 타", "美": "아름다울 미", "埋": "묻을 매", "裏": "속 리",
+    "運": "운전할 운", "休": "쉴 휴", "影": "그림자 영", "響": "울릴 향", "栄": "영화 영",
+    "養": "기를 양", "笑": "웃을 소", "顔": "얼굴 안", "延": "끌 연", "期": "기약할 기",
+    "演": "펼 연", "奏": "아뢸 주", "追": "쫓을 추", "越": "넘을 월", "抜": "뽑을 발",
+    "祝": "빌 축", "応": "응할 응", "援": "도울 원", "横": "가로 횡", "断": "끊을 단",
+    "募": "모을 모", "用": "쓸 용", "菓": "과자 과", "子": "아들 자", "起": "일어날 기",
+    "遅": "늦을 지", "互": "서로 호", "落": "떨어질 락", "着": "붙을 착", "帯": "띠 대",
+    "覚": "깨달을 각", "思": "생각 사", "主": "주인 주", "降": "내릴 강", "温": "따뜻할 온",
+    "泉": "샘 천", "絵": "그림 회", "画": "그림 화", "解": "풀 해", "決": "결단할 결",
+    "改": "고칠 개", "札": "문서 찰/패 찰", "收": "거둘 수", "収": "거둘 수", "食": "밥 식",
+    "費": "쓸 비", "返": "돌이킬 반", "替": "바꿀 체", "換": "바꿀 환", "香": "향기 향",
+    "価": "값 가", "格": "격식 격", "家": "집 가", "具": "갖출 구", "各": "각각 각",
+    "駅": "정거장 역", "確": "굳을 확", "実": "열매 실", "隠": "숨길 은", "地": "땅 지",
+    "過": "지날 과", "去": "갈 거", "囲": "둘러쌀 위", "重": "무거울 중", "貸": "빌릴 대",
+    "下": "아래 하", "線": "줄 선", "固": "굳을 고", "片": "조각 편", "方": "모 방",
+    "勝": "이길 승", "楽": "즐길 락/악기 악", "器": "그릇 기", "活": "살 활", "仮": "거짓 가/임시 가",
+    "定": "정할 정", "角": "뿔 각/모퉁이 각", "悲": "슬플 비", "必": "반드시 필", "加": "더할 가",
+    "熱": "더울 열", "可": "옳을 가", "能": "능할 능", "我": "나 아", "慢": "거만할 만/게으를 만",
+    "空": "빌 공", "借": "빌릴 차", "枯": "마를 고", "皮": "가죽 피", "渇": "목마를 갈",
+    "感": "느낄 감", "覚": "깨달을 각", "間": "사이 간", "隔": "사이 뜰 격", "観": "볼 관",
+    "客": "손님 객", "関": "관계할 관", "係": "맬 계", "光": "빛 광", "察": "살필 찰",
+    "情": "뜻 정", "心": "마음 심", "成": "이룰 성", "全": "온전할 전", "乾": "마를 건",
+    "燥": "마를 조", "気": "기운 기", "機": "틀 기", "械": "기계 계", "限": "한할 한",
+    "傷": "상처 상", "規": "법 규", "則": "법칙 칙", "待": "기다릴 대", "帰": "돌아갈 귀",
+    "宅": "집 댁", "汚": "더러울 오", "念": "생각 념", "希": "바랄 희", "望": "바랄 망",
+    "基": "터 기", "本": "근본 본", "疑": "의심할 의", "問": "물을 문", "逆": "거스를 역",
+    "急": "급할 급", "日": "날 일", "敎": "가르칠 교", "教": "가르칠 교", "師": "스승 사",
+    "通": "통할 통", "味": "맛 미", "力": "힘 력", "協": "화합할 협", "距": "떨어질 거",
+    "離": "떠날 리", "禁": "금할 금", "煙": "연기 연", "止": "그칠 지", "緊": "긴장할 긴",
+    "張": "베풀 장", "席": "자리 석", "偶": "짝 우", "然": "그럴 연", "区": "구분할 구",
+    "切": "끊을 절", "配": "나눌 배", "首": "머리 수", "別": "나눌 별", "組": "짤 조",
+    "暮": "저물 모", "比": "견줄 비", "苦": "쓸 고", "労": "일할 로", "訓": "가르칠 훈",
+    "練": "익힐 련", "経": "지날 경", "営": "경영할 영", "学": "배울 학", "計": "꾀할 계",
+    "算": "셈 산", "芸": "재주 예", "術": "재주 술", "由": "말미암을 유", "外": "바깥 외",
+    "科": "과목 과", "消": "꺼질 소", "血": "피 혈", "圧": "누를 압", "液": "진액 액",
+    "型": "모양 형", "欠": "이지러질 결", "点": "점 점", "月": "달 월", "末": "끝 말",
+    "件": "물건 건", "券": "문서 권", "原": "근원 원", "因": "인할 인", "健": "건강할 건",
+    "康": "편안할 강", "検": "검사할 검", "現": "나타날 현", "在": "있을 재", "減": "덜 감",
+    "少": "적을 소", "建": "세울 건", "設": "베풀 설", "築": "쌓을 축", "料": "헤아릴 료",
+    "恋": "그리워할 련", "高": "높을 고", "効": "본받을 효/효험 효", "果": "열매 과",
+    "合": "합할 합", "広": "넓을 광", "告": "고할 고", "流": "흐를 유", "型": "모양 형",
+    "呼": "부를 호", "吸": "마실 흡", "黒": "검을 흑", "板": "널판지 판", "腰": "허리 요",
+    "個": "낱 개", "人": "사람 인", "断": "끊을 단", "細": "가늘 세", "困": "곤할 곤",
+    "転": "구를 전", "差": "다를 차", "最": "가장 최", "初": "처음 초", "新": "새 신",
+    "材": "재목 재", "坂": "언덕 판", "道": "길 도", "盛": "성할 성", "雑": "섞일 잡",
+    "誌": "기록할 지", "左": "왼 좌", "産": "낳을 산", "参": "참여할 참", "業": "업 업",
+    "残": "남을 잔", "塩": "소금 염", "支": "지탱할 지", "給": "줄 급", "資": "재물 자",
+    "源": "근원 원", "時": "때 시", "示": "보일 시", "事": "일 사", "情": "뜻 정",
+    "自": "스스로 자", "信": "믿을 신", "勢": "기세 세", "親": "친할 친", "失": "잃을 실",
+    "物": "물건 물", "動": "움직일 동", "縛": "묶을 박", "絞": "목맬 교/짤 교", "島": "섬 도",
+    "慢": "거만할 만", "締": "맺을 체", "面": "낯 면", "者": "놈 자", "由": "말미암을 유",
+    "週": "돌 주", "刊": "책땔 간", "就": "나아갈 취", "職": "직분 직", "渋": "떫을 삽/밀릴 삽",
+    "滞": "막힐 체", "重": "무거울 중", "大": "큰 대", "集": "모을 집", "中": "가운데 중",
+    "終": "마칠 종", "修": "닦을 수", "理": "다스릴 리", "縮": "줄일 축", "小": "작을 소",
+    "手": "손 수", "術": "재주 술", "主": "주인 주", "張": "베풀 장", "出": "날 출",
+    "勤": "부지런할 근", "都": "도읍 도", "要": "요긴할 요", "類": "무리 류", "番": "차례 번",
+    "消": "꺼질 소", "極": "다할 극", "商": "장사 상", "正": "바를 정", "直": "곧을 직",
+    "乗": "탈 승", "車": "수레 차", "冗": "쓸데없을 용", "談": "말씀 담", "費": "쓸 비",
+    "品": "물건 품", "上": "위 상", "報": "알릴 보", "皿": "그릇 명", "診": "진찰할 진",
+    "申": "펼 신", "請": "청할 청", "戚": "겨레 척", "鮮": "고울 선", "長": "길 장",
+    "配": "나눌 배", "進": "나아갈 진", "歩": "걸음 보", "森": "수풀 삼", "林": "수풀 림",
+    "頭": "머리 두", "性": "성품 성", "潔": "깨끗할 결", "制": "억제할 제/제도 제", "限": "한할 한",
+    "績": "길쌈할 적/공적 적", "服": "옷 복", "西": "서녘 서", "洋": "큰바다 양", "整": "가지런할 정",
+    "石": "돌 석", "油": "기름 유", "積": "쌓을 적", "選": "가릴 선", "門": "문 문",
+    "増": "더할 증", "減": "덜 감", "送": "보낼 송", "信": "믿을 신", "想": "생각 상",
+    "早": "이를 조", "退": "물러날 퇴", "談": "말씀 담", "底": "밑 저", "育": "기를 육",
+    "卒": "마칠 졸", "院": "집 원", "会": "모일 회", "代": "대신할 대", "金": "쇠 금",
+    "滞": "막힐 체", "量": "헤아릴 량", "体": "몸 체", "抱": "안을 포", "助": "도울 조",
+    "戦": "싸울 전", "畳": "겹쳐질 첩", "他": "다를 타", "積": "쌓을 적", "頼": "의지할 뢰",
+    "短": "짧을 단", "単": "홑 단", "語": "말씀 어", "違": "어긋날 위", "球": "공 구",
+    "知": "알 지", "識": "알 식", "古": "옛 고", "駐": "머무를 주", "旬": "열흘 순",
+    "昼": "낮 주", "朝": "아침 조", "調": "고를 조", "貯": "쌓을 저", "直": "곧을 직",
+    "接": "접할 접", "疲": "피곤할 피", "付": "부칠 부", "伝": "전할 전", "続": "이을 속",
+    "包": "쌀 포", "停": "머무를 정", "電": "번개 전", "適": "맞을 적", "作": "지을 작",
+    "登": "오를 등", "場": "마당 장", "到": "이를 도", "過": "지날 과", "解": "풀 해",
+    "得": "얻을 득", "意": "뜻 의", "独": "홀로 독", "身": "몸 신", "特": "특별할 특",
+    "立": "설 립", "閉": "닫을 폐", "土": "흙 토", "突": "갑자기 돌", "飛": "날 비",
+    "泊": "머무를 박", "努": "힘쓸 노", "緒": "실마리 서", "容": "얼굴 용/담을 용", "仲": "버금 중",
+    "流": "흐를 유", "泣": "울 읍", "慰": "위로할 위", "投": "던질 투", "波": "물결 파",
+    "涙": "눈물 루", "似": "닮을 사", "握": "쥘 악", "逃": "달아날 도", "荷": "멜 하",
+    "根": "뿌리 근", "願": "원할 원", "眠": "잘 면", "農": "농사 농", "残": "남을 잔",
+    "葉": "잎 엽", "歯": "이 치", "倍": "곱 배", "達": "통달할 달", "生": "날 생",
+    "測": "잴 측", "発": "필 발", "表": "겉 표", "派": "갈래 파", "話": "말씀 화",
+    "速": "빠를 속", "払": "떨칠 발", "半": "반 반", "冷": "찰 랭", "低": "낮을 저",
+    "響": "울릴 향", "秒": "초 초", "広": "넓을 광", "不": "아니 불", "安": "편안 안",
+    "婦": "며느리 부", "深": "깊을 심", "複": "겹칠 복", "腹": "배 복", "防": "막을 방",
+    "普": "넓을 보", "物": "물건 물", "沸": "끓을 비", "騰": "오를 등", "部": "나눌 부",
+    "分": "나눌 분", "父": "아비 부", "母": "어미 모", "満": "찰 만", "振": "떨칠 진",
+    "章": "글월 장", "平": "평평할 평", "均": "고를 균", "変": "변할 변", "化": "될 화",
+    "方": "모 방", "向": "향할 향", "丁": "고무래 정", "法": "법 법", "訪": "찾을 방",
+    "律": "법률 률", "吠": "짖을 폐", "曲": "굽을 곡", "貧": "가난할 빈", "混": "섞을 혼",
+    "守": "지킬 수", "迷": "미혹할 미", "丸": "둥글 환", "回": "돌 회", "足": "발 족",
+    "短": "짧을 단", "湖": "호수 호", "緑": "초록빛 록", "身": "몸 신", "未": "아닐 미",
+    "来": "올 래", "結": "맺을 결", "娘": "계집아이 낭", "無": "없을 무", "駄": "실을 타",
+    "命": "목숨 명", "令": "하여금 령", "込": "담을 입(일본 국자)", "書": "글 서", "燃": "탈 연",
+    "目": "눈 목", "標": "표할 표", "語": "말씀 어", "句": "글귀 구", "焼": "불사를 소",
+    "訳": "번역할 역", "賃": "품삯 임", "薬": "약 약", "局": "판 국", "破": "깨뜨릴 파",
+    "郵": "우편 우", "夕": "저녁 석", "便": "편할 편", "名": "이름 명", "床": "평상 상",
+    "輸": "보낼 수", "緩": "느슨할 완", "許": "허락할 허", "翌": "이튿날 익", "汚": "더러울 오",
+    "予": "미리 예", "呼": "부를 호", "掛": "걸 괘", "約": "맺을 약", "由": "말미암을 유",
+    "行": "다닐 행", "替": "바꿀 체", "留": "머무를 류", "守": "지킬 수", "列": "벌일 렬",
+    "若": "젊을 약", "割": "나눌 할",
+    "引": "끌 인", "屋": "집 옥", "天": "하늘 천", "井": "우물 정", "偉": "클 위", "珍": "보배 진", "怖": "두려워할 포", "迎": "맞을 영", "注": "부을 주", "覗": "엿볼 사", "惜": "아낄 석", "臭": "냄새 취", "懐": "품을 회", "従": "좇을 종", "押": "누를 압", "勿": "말 물", "褒": "기릴 포", "眩": "어지러울 현", "寧": "편안할 녕", "十": "열 십", "紐": "맺을 뉴", "姿": "모양 자", "噂": "수군거릴 준", "淡": "맑을 담", "怠": "게으를 태", "辞": "말씀 사", "怪": "괴이할 괴", "恐": "두려울 공", "素": "본디 소", "晴": "갤 청", "溢": "넘칠 일", "暴": "사나울 폭", "磨": "갈 마", "飽": "배부를 포", "蓋": "덮을 개", "見": "볼 견", "舞": "춤출 무", "礼": "예도 례", "歓": "기쁠 환", "与": "줄 여", "厳": "엄할 엄", "詳": "자세할 상", "溺": "빠질 닉", "伸": "펼 신", "悔": "뉘우칠 회", "濡": "적실 유", "触": "닿을 촉", "眺": "바라볼 조", "奪": "빼앗을 탈", "秘": "숨길 비", "密": "빽빽할 밀", "執": "잡을 집", "条": "가지 조", "倒": "넘어질 도", "暫": "잠깐 잠", "評": "평할 평", "判": "판단할 판", "段": "층계 단", "薄": "엷을 박", "慌": "어리둥절할 황", "癖": "버릇 벽", "所": "바 소", "為": "할 위", "省": "살필 성/덜 생"
+  };
+
+  // 단어에서 한자만 추출하여 한국식 훈음 문자열로 변환
+  function getHanjaMeanings(wordStr) {
+    const kanjiRegex = /[\u4E00-\u9FAF\u3400-\u4DBF]/g;
+    const matches = wordStr.match(kanjiRegex);
+    if (!matches || matches.length === 0) return null;
+
+    const parsed = matches.map(char => kanjiDict[char] || `${char}(훈음 미등록)`);
+    return `(${parsed.join(', ')})`;
+  }
+
+  // JLPT N3 단어 풀 (v4, 162개)
+  const vocabList = [
+    ["引き出す", "ひきだす", "꺼내다, (돈을) 인출하다, 이끌어내다"],
+    ["屋根", "やね", "지붕"],
+    ["天井", "てんじょう", "천장"],
+    ["埋める", "うめる", "묻다, 메우다"],
+    ["包む", "つつむ", "싸다, 포장하다, 둘러싸다"],
+    ["囲む", "かこむ", "둘러싸다, 에워싸다"],
+    ["混ぜる", "まぜる", "섞다"],
+    ["大人しい", "おとなしい", "얌전하다, 온순하다"],
+    ["偉い", "えらい", "위대하다, 훌륭하다, 대단하다"],
+    ["珍しい", "めずらしい", "드물다, 신기하다"],
+    ["疑う", "うたがう", "의심하다"],
+    ["怖がる", "こわがる", "무서워하다"],
+    ["払う", "はらう", "지불하다, 털어내다"],
+    ["迷う", "まよう", "헤매다, 망설이다"],
+    ["取る", "とる", "취하다, 잡다, 빼앗다 (取られる: 빼앗기다)"],
+    ["引けを取る", "ひけをとる", "뒤지다, 꿀리다, 지다"],
+    ["迎える", "むかえる", "맞이하다, 마중하다"],
+    ["預ける", "あずける", "맡기다, 보관시키다"],
+    ["注ぐ", "そそぐ", "붓다, 따르다, 쏟다"],
+    ["覗く", "のぞく", "엿보다, 들여다보다 (除く: 제외하다)"],
+    ["惜しい", "おしい", "아깝다, 안타깝다"],
+    ["臭い", "くさい", "냄새나다, 수상쩍다"],
+    ["貧しい", "まずしい", "가난하다, 빈곤하다"],
+    ["上手い", "うまい", "잘하다, 능숙하다 (美味い: 맛있다)"],
+    ["懐かしい", "なつかしい", "그립다"],
+    ["従う", "したがう", "따르다, 순종하다 (従って: 따라서)"],
+    ["押さえる", "おさえる", "누르다, 붙잡다 (抑える: 억제하다)"],
+    ["そっと", "そっと", "살며시, 조용히, 가만히"],
+    ["ぐらぐら", "ぐらぐら", "흔들흔들, 비틀비틀"],
+    ["やっと", "やっと", "겨우, 간신히, 드디어"],
+    ["うっかり", "うっかり", "깜빡, 무심코"],
+    ["しつこい", "しつこい", "끈질기다, 집요하다, 느끼하다"],
+    ["恋しい", "こいしい", "그립다"],
+    ["勿体無い", "もったいない", "아깝다, 과분하다"],
+    ["褒める", "ほめる", "칭찬하다"],
+    ["きつい", "きつい", "꽉 끼다, 힘들다, 엄하다"],
+    ["温い", "ぬるい", "미지근하다 (眠い/ねむい: 졸리다)"],
+    ["眩しい", "まぶしい", "눈부시다"],
+    ["緩い", "ゆるい", "느슨하다, 헐렁하다"],
+    ["丁寧", "ていねい", "정중함, 공손함, 꼼꼼함"],
+    ["立派", "りっぱ", "훌륭함, 번듯함"],
+    ["覚え", "おぼえ", "기억, 배움, 느낌 (応募/おうぼ: 응모)"],
+    ["なかなか", "なかなか", "꽤, 제법 / (부정과 함께) 좀처럼"],
+    ["必ず", "かならず", "반드시, 꼭"],
+    ["十分", "じゅうぶん", "충분함, 충분히"],
+    ["紐", "ひも", "끈, 줄"],
+    ["涙", "なみだ", "눈물"],
+    ["姿", "すがた", "모습, 자태, 옷차림"],
+    ["噂", "うわさ", "소문"],
+    ["止める", "とめる", "세우다, 멈추다, 말리다"],
+    ["冷める", "さめる", "식다 (覚める: 잠이 깨다)"],
+    ["閉じる", "とじる", "닫다, (눈을) 감다, (책을) 덮다"],
+    ["貯める", "ためる", "모으다 (溜める: 쌓아두다)"],
+    ["淡い", "あわい", "희미하다, 연하다"],
+    ["怠い", "だるい", "나른하다, 몸이 무겁다"],
+    ["辞める", "やめる", "그만두다 (止める: 멈추다)"],
+    ["下げる", "さげる", "내리다, 낮추다"],
+    ["怪しい", "あやしい", "수상하다, 의심스럽다"],
+    ["恐ろしい", "おそろしい", "무섭다, 두렵다"],
+    ["素晴らしい", "すばらしい", "훌륭하다, 멋지다"],
+    ["溢れる", "あふれる", "흘러넘치다 (あぶれる: 일자리를 잃다, 밀려나다)"],
+    ["暴れる", "あばれる", "날뛰다, 난동 부리다"],
+    ["外れる", "はずれる", "빗나가다, 벗어나다"],
+    ["別れる", "わかれる", "헤어지다 (分かれる: 갈라지다, 나뉘다)"],
+    ["乗せる", "のせる", "태우다 (載せる: 싣다, 게재하다)"],
+    ["枯れる", "かれる", "시들다, 마르다"],
+    ["分ける", "わける", "나누다, 분류하다"],
+    ["結ぶ", "むすぶ", "묶다, 맺다"],
+    ["畳む", "たたむ", "접다, 개다"],
+    ["曲げる", "まげる", "구부리다, 굽히다"],
+    ["閉める", "しめる", "닫다 (締める: 조이다, 매다)"],
+    ["磨く", "みがく", "닦다, 연마하다"],
+    ["飽きる", "あきる", "질리다, 싫증 나다"],
+    ["なるべく", "なるべく", "가능한 한, 될 수 있는 대로"],
+    ["間もなく", "まもなく", "곧, 머지않아, 잠시 후"],
+    ["学ぶ", "まなぶ", "배우다, 익히다"],
+    ["蓋", "ふた", "뚜껑"],
+    ["傷", "きず", "상처, 흠집"],
+    ["お見舞い", "おみまい", "병문안, 문안"],
+    ["お礼", "おれい", "감사, 사례, 답례"],
+    ["通り過ぎる", "とおりすぎる", "지나치다, 통과하다"],
+    ["引き受ける", "ひきうける", "떠맡다, 인수하다"],
+    ["打ち合わせる", "うちあわせる", "사전 협의하다, 미팅하다"],
+    ["大方", "おおかた", "대부분, 아마도, 대체로"],
+    ["他方", "たほう", "다른 한편, 다른 방면"],
+    ["歓迎", "かんげい", "환영"],
+    ["失う", "うしなう", "잃다, 잃어버리다"],
+    ["扱う", "あつかう", "다루다, 취급하다 (預かる/あずかる: 맡다)"],
+    ["与える", "あたえる", "주다, 부여하다"],
+    ["閉まる", "しまる", "닫히다 (締まる: 조여지다)"],
+    ["厳しい", "きびしい", "엄격하다, 혹독하다"],
+    ["詳しい", "くわしい", "자세하다, 상세하다"],
+    ["細かい", "こまかい", "잘다, 미세하다, 꼼꼼하다"],
+    ["溺れる", "おぼれる", "물에 빠지다, 탐닉하다"],
+    ["流す", "ながす", "흘리다, 떠내려 보내다"],
+    ["暮らす", "くらす", "살아가다, 생활하다"],
+    ["伸ばす", "のばす", "늘이다, 펴다 (延ばす: 연기하다)"],
+    ["悔しい", "くやしい", "분하다, 억울하다"],
+    ["乾く", "かわく", "마르다, 건조하다"],
+    ["空く", "すく", "비다, 한산하다, (배가) 고프다"],
+    ["濡れる", "ぬれる", "젖다"],
+    ["握る", "にぎる", "쥐다, 잡다"],
+    ["触る", "さわる", "만지다, 손대다"],
+    ["振る", "ふる", "흔들다, (사람을) 차다/거절하다"],
+    ["合わせる", "あわせる", "맞추다, 합치다"],
+    ["眺める", "ながめる", "바라보다, 전망하다"],
+    ["編む", "あむ", "뜨개질하다, (머리를) 땋다"],
+    ["縛る", "しばる", "묶다, 결박하다"],
+    ["奪う", "うばう", "빼앗다, 가로채다"],
+    ["秘密", "ひみつ", "비밀"],
+    ["固執", "こしゅう", "고집 (呼称/こしょう: 호칭)"],
+    ["条件", "じょうけん", "조건"],
+    ["面倒", "めんどう", "귀찮음, 번거로움, 보살핌"],
+    ["内緒", "ないしょ", "비밀, 내밀"],
+    ["加える", "くわえる", "더하다, 보태다 (咥える: 입에 물다)"],
+    ["重ねる", "かさねる", "포개다, 거듭하다"],
+    ["直ちに", "ただちに", "즉시, 곧바로"],
+    ["暫く", "しばらく", "잠시, 당분간"],
+    ["それなら", "それなら", "그렇다면, 그러면"],
+    ["我慢", "がまん", "참음, 인내"],
+    ["評価", "ひょうか", "평가"],
+    ["評判", "ひょうばん", "평판, 세상의 소문"],
+    ["隠す", "かくす", "숨기다, 감추다"],
+    ["過ごす", "すごす", "(시간을) 보내다, 지내다"],
+    ["普段", "ふだん", "평소, 일상"],
+    ["薄い", "うすい", "얇다, 옅다, 싱겁다"],
+    ["伸びる", "のびる", "늘어나다, 자라다 (延びる: 연기되다)"],
+    ["立つ", "たつ", "서다 (建つ: 세워지다, 経つ: 지나다)"],
+    ["変わる", "かわる", "바뀌다, 달라지다 (代わる: 대신하다)"],
+    ["追う", "おう", "쫓다, 따르다 (折る/おる: 꺾다, 접다)"],
+    ["のんびり", "のんびり", "한가로이, 느긋하게"],
+    ["がっかり", "がっかり", "실망함, 낙담함"],
+    ["はっきり", "はっきり", "분명히, 또렷하게"],
+    ["しっかり", "しっかり", "확실히, 단단히"],
+    ["慌てる", "あわてる", "당황하다, 허둥지둥하다"],
+    ["測る", "はかる", "재다, 측정하다 (計る/図る: 계산하다/도모하다)"],
+    ["疲れる", "つかれる", "지치다, 피곤하다"],
+    ["癖", "くせ", "버릇, 습관"],
+    ["向き", "むき", "방향, 적합함"],
+    ["所為", "せい", "탓, 원인 (背: 키)"],
+    ["訳", "わけ", "이유, 까닭"],
+    ["感覚", "かんかく", "감각 (間隔: 간격)"],
+    ["調子", "ちょうし", "컨디션, 상태"],
+    ["防ぐ", "ふせぐ", "막다, 방어하다, 예방하다"],
+    ["省く", "はぶく", "줄이다, 생략하다, 덜다"],
+    ["向く", "むく", "향하다, 적합하다 (剥く: 껍질을 벗기다)"],
+    ["抜く", "ぬく", "뽑다, 빼다"],
+    ["流れ", "ながれ", "흐름, 추세"],
+    ["実り", "みのり", "결실, 성과"],
+    ["無関心", "むかんしん", "무관심 (無感: 무감각)"],
+    ["見出し", "みだし", "표제, 헤드라인"],
+    ["掛かる", "かかる", "걸리다, (시간·비용이) 들다"],
+    ["流れる", "ながれる", "흘러가다, 떠내려가다"],
+    ["向かい", "むかい", "맞은편, 건너편"],
+    ["ばらばら", "ばらばら", "뿔뿔이, 따로따로, 산산이"],
+    ["早速", "さっそく", "곧바로, 즉시, 당장"],
+    ["突然", "とつぜん", "갑자기, 돌연"],
+    ["止まる", "とまる", "멈추다, 서다 (泊まる: 숙박하다)"],
+    ["ぶらぶら", "ぶらぶら", "빈둥빈둥, 어슬렁어슬렁"],
+    ["うろうろ", "うろうろ", "우왕좌왕, 서성서성"],
+    ["ぐっすり", "ぐっすり", "푹 (깊이 잠든 모양)"],
+    ["ぴったり", "ぴったり", "딱, 꼭 맞게, 빈틈없이"]
+  ];
+
+  vocabList.forEach((item, idx) => { item.id = idx; });
+
+  const STORAGE_KEY = "JLPT_N3_WRONG_COUNTS_V4";
+  const THEME_KEY = "JLPT_N3_THEME_MODE";
+  let wrongCounts = {};
+
+  function loadWrongCounts() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      wrongCounts = data ? JSON.parse(data) : {};
+    } catch(e) {
+      wrongCounts = {};
+    }
+  }
+
+  function saveWrongCounts() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(wrongCounts));
+    } catch(e) {}
+  }
+
+  function getCount(id) {
+    return wrongCounts[id] || 0;
+  }
+
+  function recordWrong(id) {
+    wrongCounts[id] = (wrongCounts[id] || 0) + 1;
+    saveWrongCounts();
+  }
+
+  // 테마 관리 로직
+  function initTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === 'light') {
+      document.body.classList.add('theme-light');
+      document.getElementById('themeBtn').innerText = "☀️ 화이트";
+    } else {
+      document.body.classList.remove('theme-light');
+      document.getElementById('themeBtn').innerText = "🌙 다크";
+    }
+  }
+
+  function toggleTheme() {
+    const isLight = document.body.classList.toggle('theme-light');
+    localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+    document.getElementById('themeBtn').innerText = isLight ? "☀️ 화이트" : "🌙 다크";
+  }
+
+  let selectedListType = 'all';
+  let selectedQuizType = 1;
+  let currentPool = [];
+  let currentIndex = 0;
+  let currentWord = null;
+
+  function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function updateCountsUI() {
+    loadWrongCounts();
+    let c1 = 0, c2 = 0, c3 = 0;
+    vocabList.forEach(w => {
+      const cnt = getCount(w.id);
+      if (cnt === 1) c1++;
+      else if (cnt === 2) c2++;
+      else if (cnt >= 3) c3++;
+    });
+
+    document.getElementById("countAll").innerText = `${vocabList.length}개`;
+    document.getElementById("countW1").innerText = `${c1}개`;
+    document.getElementById("countW2").innerText = `${c2}개`;
+    document.getElementById("countW3").innerText = `${c3}개`;
+  }
+
+  function selectList(type, el) {
+    document.querySelectorAll("#listSelectionGrid .select-item").forEach(item => item.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedListType = type;
+  }
+
+  function selectType(typeNum, el) {
+    document.querySelectorAll("#typeSelectionGrid .select-item").forEach(item => item.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedQuizType = typeNum;
+  }
+
+  function startQuizSession() {
+    loadWrongCounts();
+
+    if (selectedListType === 'all') {
+      currentPool = [...vocabList];
+    } else if (selectedListType === 'wrong1') {
+      currentPool = vocabList.filter(w => getCount(w.id) === 1);
+    } else if (selectedListType === 'wrong2') {
+      currentPool = vocabList.filter(w => getCount(w.id) === 2);
+    } else if (selectedListType === 'wrong3') {
+      currentPool = vocabList.filter(w => getCount(w.id) >= 3);
+    }
+
+    if (currentPool.length === 0) {
+      alert("선택하신 목록에 해당하는 단어가 없습니다!");
+      return;
+    }
+
+    currentPool = shuffle(currentPool);
+    currentIndex = 0;
+
+    showScreen("quizScreen");
+    loadQuestion();
+  }
+
+  function showScreen(screenId) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    document.getElementById(screenId).classList.add("active");
+  }
+
+  function goToSetup() {
+    updateCountsUI();
+    showScreen("setupScreen");
+  }
+
+  function confirmResetStats() {
+    if (confirm("모든 오답 누적 기록을 완전히 초기화하시겠습니까?")) {
+      wrongCounts = {};
+      saveWrongCounts();
+      updateCountsUI();
+      alert("오답 기록이 초기화되었습니다.");
+    }
+  }
+
+  function getSmartDistractors(targetWord, quizType) {
+    const distractors = [];
+    const targetReading = targetWord[1];
+    const targetMeaning = targetWord[2];
+    const candidates = vocabList.filter(w => w.id !== targetWord.id);
+
+    if (quizType === 1) {
+      const sorted = candidates.map(w => {
+        let score = 0;
+        const r = w[1];
+        if (r.length === targetReading.length) score += 4;
+        if (r[0] === targetReading[0]) score += 3;
+        if (r[r.length - 1] === targetReading[targetReading.length - 1]) score += 2;
+        return { word: w, score };
+      }).sort((a, b) => b.score - a.score);
+
+      for (let item of sorted) {
+        if (!distractors.includes(item.word[1]) && item.word[1] !== targetReading) {
+          distractors.push(item.word[1]);
+          if (distractors.length >= 6) break;
+        }
+      }
+    } else {
+      const endsWithDa = targetMeaning.endsWith("다");
+      const isShortNoun = !endsWithDa && targetMeaning.length <= 4;
+
+      const sorted = candidates.map(w => {
+        let score = 0;
+        const m = w[2];
+        if (endsWithDa && m.endsWith("다")) score += 4;
+        if (!endsWithDa && !m.endsWith("다")) score += 3;
+        if (isShortNoun && m.length <= 4) score += 2;
+        return { word: w, score };
+      }).sort((a, b) => b.score - a.score + (Math.random() - 0.5));
+
+      for (let item of sorted) {
+        if (!distractors.includes(item.word[2]) && item.word[2] !== targetMeaning) {
+          distractors.push(item.word[2]);
+          if (distractors.length >= 6) break;
+        }
+      }
+    }
+
+    while (distractors.length < 6) {
+      const rand = candidates[Math.floor(Math.random() * candidates.length)];
+      const val = (quizType === 1) ? rand[1] : rand[2];
+      const correctVal = (quizType === 1) ? targetReading : targetMeaning;
+      if (!distractors.includes(val) && val !== correctVal) {
+        distractors.push(val);
+      }
+    }
+
+    return distractors;
+  }
+
+  function loadQuestion() {
+    if (currentIndex >= currentPool.length) {
+      document.getElementById("finishSummary").innerText = 
+        `총 ${currentPool.length}단어를 중복 없이 1회독 완료했습니다!`;
+      showScreen("finishScreen");
+      return;
+    }
+
+    currentWord = currentPool[currentIndex];
+    const [kanji, reading, meaning] = currentWord;
+
+    const progressPct = ((currentIndex) / currentPool.length) * 100;
+    document.getElementById("progressBar").style.width = `${progressPct}%`;
+
+    const badge = document.getElementById("promptTypeBadge");
+    const prompt = document.getElementById("promptWord");
+    let correctAnswer = "";
+
+    if (selectedQuizType === 1) {
+      badge.innerText = `[유형 1] 발음(히라가나) 맞추기 (${currentIndex + 1}/${currentPool.length})`;
+      prompt.innerText = kanji;
+      correctAnswer = reading;
+    } else if (selectedQuizType === 2) {
+      badge.innerText = `[유형 2] 한자 ➔ 한국어 뜻 맞추기 (${currentIndex + 1}/${currentPool.length})`;
+      prompt.innerText = kanji;
+      correctAnswer = meaning;
+    } else {
+      badge.innerText = `[유형 3] 발음 ➔ 한국어 뜻 맞추기 (${currentIndex + 1}/${currentPool.length})`;
+      prompt.innerText = reading;
+      correctAnswer = meaning;
+    }
+
+    document.getElementById("detailCard").classList.remove("show");
+    document.getElementById("nextBtn").style.display = "none";
+
+    const distractors = getSmartDistractors(currentWord, selectedQuizType);
+    const shuffledOptions = shuffle([correctAnswer, ...distractors]);
+
+    const optContainer = document.getElementById("optionsContainer");
+    optContainer.innerHTML = "";
+
+    // 1~7번 보기
+    shuffledOptions.forEach((optText, i) => {
+      const btn = document.createElement("button");
+      btn.className = "opt-btn";
+      btn.innerHTML = `<span class="num">${i + 1}.</span> <span>${optText}</span>`;
+      btn.onclick = () => checkAnswer(btn, optText, correctAnswer, false);
+      optContainer.appendChild(btn);
+    });
+
+    // 8번 보기: 모르겠어요
+    const unknownBtn = document.createElement("button");
+    unknownBtn.className = "opt-btn unknown-btn";
+    unknownBtn.innerHTML = `<span class="num">8.</span> <span>❓ 모르겠어요</span>`;
+    unknownBtn.onclick = () => checkAnswer(unknownBtn, "__UNKNOWN__", correctAnswer, true);
+    optContainer.appendChild(unknownBtn);
+  }
+
+  function checkAnswer(selectedBtn, selectedText, correctText, isUnknown) {
+    const allButtons = document.querySelectorAll(".opt-btn");
+    allButtons.forEach(b => b.disabled = true);
+
+    const [kanji, reading, meaning] = currentWord;
+    const isCorrect = !isUnknown && (selectedText === correctText);
+
+    if (isCorrect) {
+      selectedBtn.classList.add("correct");
+    } else {
+      if (isUnknown) {
+        selectedBtn.classList.add("selected-unknown");
+      } else {
+        selectedBtn.classList.add("wrong");
+      }
+      allButtons.forEach(b => {
+        if (b.innerText.includes(correctText)) {
+          b.classList.add("correct");
+        }
+      });
+      recordWrong(currentWord.id);
+    }
+
+    // 상세 카드 정보 채우기
+    document.getElementById("detailKanji").innerText = kanji;
+    
+    // 한국식 한자 훈음 파싱 및 표시
+    const hanjaMeanings = getHanjaMeanings(kanji);
+    const hanjaBox = document.getElementById("detailHanjaBox");
+    if (hanjaMeanings) {
+      document.getElementById("detailHanjaMeaning").innerText = hanjaMeanings;
+      hanjaBox.style.display = "flex";
+    } else {
+      hanjaBox.style.display = "none";
+    }
+
+    document.getElementById("detailReading").innerText = reading;
+    document.getElementById("detailMeaning").innerText = meaning;
+    document.getElementById("detailCard").classList.add("show");
+
+    document.getElementById("nextBtn").style.display = "block";
+  }
+
+  function nextQuestion() {
+    currentIndex++;
+    loadQuestion();
+  }
+
+  // 초기 실행
+  initTheme();
+  updateCountsUI();
+</script>
+</body>
+</html>
